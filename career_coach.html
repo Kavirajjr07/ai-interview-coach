@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}AI Career Coach - InterviewAI{% endblock %}
+
+{% block head_extra %}
+<!-- Marked.js for rendering markdown responses -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+/* Custom style overrides for Coach Chat */
+.chat-container {
+    height: 480px;
+    overflow-y: auto;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-md);
+    background: rgba(13, 20, 38, 0.2);
+}
+.coach-bubble-msg {
+    max-width: 85%;
+    padding: 16px 20px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.coach-bubble-msg.incoming {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--glass-border);
+}
+.coach-bubble-msg.outgoing {
+    align-self: flex-end;
+    background: var(--gradient-accent);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+/* Style adjustments for marked parsed output */
+.coach-bubble-msg p:last-child {
+    margin-bottom: 0;
+}
+.coach-bubble-msg ul, .coach-bubble-msg ol {
+    padding-left: 20px;
+    margin-bottom: 8px;
+}
+.coach-bubble-msg code {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12 mb-4">
+        <h2 class="fw-bold"><i class="fas fa-user-tie me-2 text-gradient-accent"></i>AI Career Coach</h2>
+        <p class="text-secondary">Get career guidance, personalized skill roadmaps, certification recommendations, and job preparation plans from your AI mentor.</p>
+    </div>
+</div>
+
+<div class="row g-4 fade-in">
+    <!-- Chat Area -->
+    <div class="col-lg-8">
+        <div class="glass-panel p-4 d-flex flex-column justify-content-between h-100">
+            <!-- Messages Box -->
+            <div class="chat-container d-flex flex-column gap-3 p-3 mb-3" id="chatContainer">
+                <div class="coach-bubble-msg incoming shadow-sm">
+                    <strong>InterviewAI Coach:</strong><br>
+                    Welcome to your Career Workspace! Ask me any questions regarding interview readiness, professional roadmaps, or technical certifications.<br><br>
+                    You can select one of the quick assistance presets on the right, or type your own question below.
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="d-flex gap-2">
+                <input type="text" id="chatInput" class="form-control form-glass py-3" placeholder="Type your career question here..." autocomplete="off">
+                <button type="button" id="sendChatBtn" class="btn-premium px-4"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Presets / Quick prompts -->
+    <div class="col-lg-4">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Quick Assistance</h5>
+            <p class="text-secondary small mb-4">Click any preset shortcut to generate immediate structured roadmaps:</p>
+            
+            <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-premium-outline text-start py-2" onclick="sendPreset('Generate a learning roadmap for an AI Engineer.');">
+                    <i class="fas fa-compass me-2 text-info"></i>AI Engineer Roadmap
+                </button>
+                <button type="button" class="btn btn-premium-outline text-start py-2" onclick="sendPreset('Recommend certifications for AWS cloud security.');">
+                    <i class="fas fa-certificate me-2 text-warning"></i>Cloud Security Certifications
+                </button>
+                <button type="button" class="btn btn-premium-outline text-start py-2" onclick="sendPreset('Give me a job preparation plan for a Frontend Developer.');">
+                    <i class="fas fa-clipboard-list me-2 text-success"></i>Frontend Developer Prep Plan
+                </button>
+                <button type="button" class="btn btn-premium-outline text-start py-2" onclick="sendPreset('How do I negotiate salary for a Senior Developer position?');">
+                    <i class="fas fa-comments-dollar me-2 text-danger"></i>Salary Negotiation Tips
+                </button>
+            </div>
+
+            <hr class="text-white opacity-10 my-4">
+
+            <div class="text-center p-3 rounded" style="background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border);">
+                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Responses are compiled real-time by Llama 3 based on global standards.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chatContainer = document.getElementById('chatContainer');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+
+    if (!chatInput || !sendBtn) return;
+
+    // Send Message handler
+    const sendCoachMessage = async (msgText) => {
+        const text = msgText || chatInput.value.trim();
+        if (!text) return;
+
+        if (!msgText) {
+            chatInput.value = '';
+        }
+
+        // 1. Append outgoing msg
+        appendMessage(text, 'outgoing');
+
+        // 2. Append typing indicator
+        const loadingId = appendMessage('<span class="spinner-grow spinner-grow-sm" role="status"></span> Compiling advice...', 'incoming');
+
+        try {
+            const response = await fetch('/api/career_coach/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, system_role: 'coach' })
+            });
+            const data = await response.json();
+            
+            // Remove typing indicator
+            const loadingMsg = document.getElementById(loadingId);
+            if (loadingMsg) loadingMsg.remove();
+
+            if (data.success) {
+                // Parse markdown in replies
+                const parsedContent = marked.parse(data.reply);
+                appendMessage(parsedContent, 'incoming', true);
+            } else {
+                appendMessage('Sorry, I encountered an issue compiling guidelines. Please retry.', 'incoming');
+            }
+        } catch (error) {
+            console.error(error);
+            const loadingMsg = document.getElementById(loadingId);
+            if (loadingMsg) loadingMsg.remove();
+            appendMessage('Network connection error. Failed to contact AI Career Coach.', 'incoming');
+        }
+    };
+
+    sendBtn.addEventListener('click', () => sendCoachMessage());
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendCoachMessage();
+    });
+
+    window.sendPreset = (presetText) => {
+        sendCoachMessage(presetText);
+    };
+});
+
+function appendMessage(content, direction, isHtml = false) {
+    const container = document.getElementById('chatContainer');
+    if (!container) return null;
+
+    const msgId = 'coach-msg-' + Date.now();
+    const bubble = document.createElement('div');
+    bubble.id = msgId;
+    bubble.className = `coach-bubble-msg ${direction} shadow-sm fade-in`;
+    
+    if (direction === 'incoming') {
+        const header = `<strong>AI Career Coach:</strong><br>`;
+        if (isHtml) {
+            bubble.innerHTML = header + content;
+        } else {
+            bubble.innerHTML = header + content.replace(/\n/g, '<br>');
+        }
+    } else {
+        bubble.textContent = content;
+    }
+
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+    return msgId;
+}
+</script>
+{% endblock %}

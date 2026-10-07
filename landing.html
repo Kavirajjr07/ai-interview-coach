@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}InterviewAI - Master Your Interview Skills with AI{% endblock %}
+
+{% block main_content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center min-vh-75 py-5">
+            <div class="col-lg-6 text-center text-lg-start">
+                <span class="badge bg-gradient-neon px-3 py-2 rounded-pill mb-3 text-uppercase fw-bold" style="font-size: 0.8rem; letter-spacing: 0.05em;">Powered by Llama 3 AI</span>
+                <h1 class="display-3 fw-bold mb-4 line-height-1" style="font-family: var(--font-heading);">
+                    Master Your <span class="text-gradient-neon">Interview Skills</span> with AI
+                </h1>
+                <p class="lead text-secondary mb-5">
+                    Practice Mock Interviews, Analyze Resumes, Improve Communication Skills, and Land Your Dream Job.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+                    <a href="{{ url_for('register') }}" class="btn-premium btn-lg">
+                        <i class="fas fa-play me-2"></i>Start Free Interview
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn-premium-outline btn-lg">
+                        <i class="fas fa-file-upload me-2"></i>Upload Resume
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0 text-center">
+                <div class="position-relative d-inline-block float-effect">
+                    <div class="glass-panel p-4 rounded-4 shadow-lg position-relative" style="background: rgba(13, 20, 38, 0.4); max-width: 450px; border-color: rgba(99, 102, 241, 0.25);">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-success p-2 me-3" style="width: 12px; height: 12px; animation: pulse-ring 2s infinite;"></div>
+                            <span class="fw-bold" style="color: var(--accent-cyan);">Active AI Interview Simulator</span>
+                        </div>
+                        <div class="bg-dark rounded-3 p-3 text-start mb-3 font-monospace text-success" style="font-size: 0.85rem; background: #0c0f1a !important; border: 1px solid rgba(255,255,255,0.05);">
+                            <span class="text-secondary">[System]</span> Initializing HR Interview round...<br>
+                            <span class="text-secondary">[AI]</span> "Tell me about a time you resolved a major production bug under pressure."<br><br>
+                            <span class="text-info">[Candidate Voice Input active...]</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-secondary" style="font-size: 0.8rem;">
+                            <span><i class="fas fa-volume-up me-1"></i> Real-time Speech Analysis</span>
+                            <span>98.6% Accuracy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5" style="background: rgba(13, 20, 38, 0.2);">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="glass-panel stat-card">
+                    <h2 class="fw-bold text-gradient-accent mb-1">100k+</h2>
+                    <p class="text-secondary mb-0">Interviews Completed</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="glass-panel stat-card">
+                    <h2 class="fw-bold text-gradient-neon mb-1">95%</h2>
+                    <p class="text-secondary mb-0">ATS Pass Rate</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="glass-panel stat-card">
+                    <h2 class="fw-bold text-gradient-accent mb-1">15k+</h2>
+                    <p class="text-secondary mb-0">Users Placed</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="glass-panel stat-card">
+                    <h2 class="fw-bold text-gradient-neon mb-1">4.9/5</h2>
+                    <p class="text-secondary mb-0">User Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 my-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">Elevate Your Practice</span>
+            <h2 class="display-5 fw-bold mb-3">AI-Powered Features</h2>
+            <p class="text-secondary max-width-600 mx-auto">Get access to professional recruitment preparation tools designed to mimic high-pressure technical and behavioral rounds.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-accent"><i class="fas fa-comments"></i></div>
+                    <h4 class="fw-bold mb-3">Mock Interviews</h4>
+                    <p class="text-secondary">Simulate full interviews for Technical, HR, Behavioral, and Coding tracks tailored to target roles and companies.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-neon"><i class="fas fa-file-invoice"></i></div>
+                    <h4 class="fw-bold mb-3">Resume Analyzer</h4>
+                    <p class="text-secondary">Upload PDF/DOCX resumes. Get detailed reports with ATS scores, missing keywords, formatting errors, and grammar recommendations.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-accent"><i class="fas fa-microphone"></i></div>
+                    <h4 class="fw-bold mb-3">Voice Analysis</h4>
+                    <p class="text-secondary">Built-in Speech-to-Text that tracks pronunciation, clarity, average confidence indicators, and highlights unnecessary filler word density.</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-neon"><i class="fas fa-code"></i></div>
+                    <h4 class="fw-bold mb-3">Coding Sandbox</h4>
+                    <p class="text-secondary">Execute problems in Python, JavaScript, Java, and C++ with CodeMirror. Reviews code complexity and outputs optimized templates.</p>
+                </div>
+            </div>
+            <!-- Feature 5 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-accent"><i class="fas fa-user-tie"></i></div>
+                    <h4 class="fw-bold mb-3">AI Career Coach</h4>
+                    <p class="text-secondary">A dedicated career mentor assistant that constructs learning roadmaps, details certification targets, and maps job plans.</p>
+                </div>
+            </div>
+            <!-- Feature 6 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hover p-4 h-100">
+                    <div class="feature-icon text-gradient-neon"><i class="fas fa-trophy"></i></div>
+                    <h4 class="fw-bold mb-3">XP & Gamification</h4>
+                    <p class="text-secondary">Earn dynamic preparation XP, unlock achievements, track login activity streaks, and watch your metrics climb.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5" style="background: rgba(13, 20, 38, 0.1);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Success Stories</h2>
+            <p class="text-secondary max-width-600 mx-auto">See how job seekers accelerated their interview preparedness and landed offers at top tech giants.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                    <p class="text-secondary fst-italic">"The technical mock interview rounds prepared me exactly for my Google interview structure. The AI code optimization feedback was extremely helpful."</p>
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="rounded-circle bg-gradient-accent d-flex align-items-center justify-content-center text-white fw-bold me-3" style="width: 50px; height: 50px;">
+                            SK
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Siddharth Kumar</h6>
+                            <small class="text-muted">Software Engineer, Google</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                    <p class="text-secondary fst-italic">"Using the resume analyzer, I raised my ATS match score from 65 to 88. The keyword suggestions helped me clear screening rounds easily."</p>
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="rounded-circle bg-gradient-neon d-flex align-items-center justify-content-center text-white fw-bold me-3" style="width: 50px; height: 50px;">
+                            AP
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Aria Patel</h6>
+                            <small class="text-muted">UI/UX Designer, Zoho</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                    <p class="text-secondary fst-italic">"The Speech feedback on filler words was an eye-opener. Eliminating 'ums' and 'likes' boosted my verbal confidence."</p>
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="rounded-circle bg-gradient-accent d-flex align-items-center justify-content-center text-white fw-bold me-3" style="width: 50px; height: 50px;">
+                            MD
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Marcus Davis</h6>
+                            <small class="text-muted">DevOps Lead, Microsoft</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="py-5 my-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Simple, Flexible Pricing</h2>
+            <p class="text-secondary max-width-600 mx-auto">Get access to premium mock parameters. Choose the tier that matches your career path goals.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Free -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-3">Free Sandbox</h4>
+                        <div class="mb-4">
+                            <span class="display-4 fw-bold">$0</span>
+                            <span class="text-muted">/month</span>
+                        </div>
+                        <ul class="list-unstyled text-start mb-4 text-secondary">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 2 Full AI Interviews</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Basic Resume Audit (1 Upload)</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Real-time Speech-to-Text</li>
+                            <li class="mb-2 text-muted"><i class="fas fa-times text-danger me-2"></i> Custom Coding Sandbox</li>
+                            <li class="mb-2 text-muted"><i class="fas fa-times text-danger me-2"></i> PDF Performance Report Exporter</li>
+                        </ul>
+                    </div>
+                    <a href="{{ url_for('register') }}" class="btn-premium-outline w-100">Get Started</a>
+                </div>
+            </div>
+            <!-- Pro -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel p-4 text-center border-primary h-100 d-flex flex-column justify-content-between position-relative" style="border: 2px solid var(--accent-purple) !important; background: rgba(139, 92, 246, 0.05);">
+                    <span class="position-absolute top-0 start-50 translate-middle badge bg-gradient-accent px-3 py-2 rounded-pill text-uppercase" style="font-size: 0.75rem;">Recommended</span>
+                    <div>
+                        <h4 class="fw-bold mb-3">Unlimited Pro</h4>
+                        <div class="mb-4">
+                            <span class="display-4 fw-bold">$29</span>
+                            <span class="text-muted">/month</span>
+                        </div>
+                        <ul class="list-unstyled text-start mb-4 text-secondary">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Unlimited Mock Interviews</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Unlimited Resume ATS Audits</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Complete Speech & Filler Analysis</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Interactive CodeMirror Sandbox</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> PDF Performance Report Exporter</li>
+                        </ul>
+                    </div>
+                    <a href="{{ url_for('register') }}" class="btn-premium w-100">Upgrade to Pro</a>
+                </div>
+            </div>
+            <!-- Enterprise -->
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-3">Enterprise Suite</h4>
+                        <div class="mb-4">
+                            <span class="display-4 fw-bold">Custom</span>
+                        </div>
+                        <ul class="list-unstyled text-start mb-4 text-secondary">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Multi-seat dashboard for Universities</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Custom Company-specific templates</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> API Access to scoring metrics</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Dedicated Client Account Manager</li>
+                        </ul>
+                    </div>
+                    <a href="{{ url_for('register') }}" class="btn-premium-outline w-100">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Accordion -->
+<section id="faq" class="py-5 my-5">
+    <div class="container max-width-800">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Frequently Asked Questions</h2>
+            <p class="text-secondary">Find answers to common questions regarding how our platform calculates scores.</p>
+        </div>
+
+        <div class="accordion accordion-flush glass-panel p-3 rounded-4" id="faqAccordion">
+            <div class="accordion-item bg-transparent text-white border-bottom border-light border-opacity-10 py-3">
+                <h2 class="accordion-header bg-transparent">
+                    <button class="accordion-button collapsed bg-transparent text-white fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        How does the AI evaluate my interview responses?
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-secondary">
+                        The platform processes your responses (via speech transcription or written text) using natural language understanding patterns powered by our model framework. It rates you on standard corporate grading metrics: clarity, depth of knowledge, problem-solving, and communication skill.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item bg-transparent text-white border-bottom border-light border-opacity-10 py-3">
+                <h2 class="accordion-header bg-transparent">
+                    <button class="accordion-button collapsed bg-transparent text-white fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        How accurate is the Speech-to-Text engine?
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-secondary">
+                        The application implements the Web Speech API. It transcribes input real-time, calculates speech pace, lists filler words (like "um", "uh"), and provides an average confidence percentage.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-transparent text-white py-3">
+                <h2 class="accordion-header bg-transparent">
+                    <button class="accordion-button collapsed bg-transparent text-white fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        Can I upload PDF or Word resumes?
+                    </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-secondary">
+                        Yes, our Resume Analyzer fully supports uploading and parsing both PDF (`.pdf`) and Microsoft Word (`.docx`) document layouts.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form -->
+<section id="contact" class="py-5 my-5">
+    <div class="container max-width-600">
+        <div class="glass-panel p-5 rounded-4 shadow">
+            <h2 class="fw-bold mb-3 text-center">Get in Touch</h2>
+            <p class="text-secondary text-center mb-4">Have questions or feedback? Drop us a line and our support team will respond shortly.</p>
+            
+            <form onsubmit="event.preventDefault(); showToast('Message received! Thank you for contacting us.', 'success'); this.reset();">
+                <div class="mb-3">
+                    <label class="form-label text-secondary small fw-bold">Full Name</label>
+                    <input type="text" class="form-control form-glass" placeholder="John Doe" required autocomplete="name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-secondary small fw-bold">Email Address</label>
+                    <input type="email" class="form-control form-glass" placeholder="name@domain.com" required autocomplete="email">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-secondary small fw-bold">Message</label>
+                    <textarea class="form-control form-glass" rows="4" placeholder="How can we help you?" required></textarea>
+                </div>
+                <button type="submit" class="btn-premium w-100">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

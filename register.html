@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Register - InterviewAI{% endblock %}
+
+{% block main_content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-90 py-5">
+    <div class="glass-panel p-5 rounded-4 shadow-lg w-100 float-effect" style="max-width: 480px; background: rgba(13, 20, 38, 0.5);">
+        <div class="text-center mb-4">
+            <a href="{{ url_for('landing') }}" class="navbar-brand text-gradient-neon d-inline-flex align-items-center mb-3">
+                <i class="fas fa-brain me-2 text-gradient-accent"></i>
+                <span class="fs-3">InterviewAI</span>
+            </a>
+            <h4 class="fw-bold text-white">Create Account</h4>
+            <p class="text-secondary small">Start simulating mock interviews in minutes</p>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST" onsubmit="return validatePasswords();">
+            <div class="mb-3">
+                <label for="name" class="form-label text-secondary small fw-bold">Full Name</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary form-glass" style="border-radius: 8px 0 0 8px;"><i class="fas fa-user"></i></span>
+                    <input type="text" id="name" name="name" class="form-control form-glass border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="John Doe" required autocomplete="name">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label text-secondary small fw-bold">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary form-glass" style="border-radius: 8px 0 0 8px;"><i class="fas fa-envelope"></i></span>
+                    <input type="email" id="email" name="email" class="form-control form-glass border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="name@domain.com" required autocomplete="email">
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="password" class="form-label text-secondary small fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-secondary form-glass" style="border-radius: 8px 0 0 8px;"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="password" name="password" class="form-control form-glass border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="confirm_password" class="form-label text-secondary small fw-bold">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-secondary form-glass" style="border-radius: 8px 0 0 8px;"><i class="fas fa-check-double"></i></span>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control form-glass border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-premium w-100 py-3 mb-3">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+            </button>
+            
+            <p class="text-center text-secondary small mb-0">
+                Already have an account? <a href="{{ url_for('login') }}" class="text-gradient-neon fw-bold">Sign In</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function validatePasswords() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    
+    if (password !== confirm) {
+        showToast('Passwords do not match.', 'error');
+        return false;
+    }
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters.', 'error');
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}

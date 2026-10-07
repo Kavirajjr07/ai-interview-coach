@@ -1,0 +1,560 @@
+{% extends "base.html" %}
+
+{% block title %}Mock Interview - InterviewAI{% endblock %}
+
+{% block content %}
+<!-- ========================================== -->
+<!-- 1. SETUP MODE                              -->
+<!-- ========================================== -->
+{% if setup %}
+<div class="row justify-content-center fade-in">
+    <div class="col-lg-8">
+        <div class="glass-panel p-5 rounded-4 shadow">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">Simulation Engine v1.0</span>
+                <h3 class="fw-bold text-white">Setup Mock Interview</h3>
+                <p class="text-secondary">Configure your interview parameters. The AI will generate tailored questions based on your profile inputs.</p>
+            </div>
+
+            <form action="{{ url_for('interview_setup') }}" method="POST" id="setupForm" onsubmit="showLoadingScreen();">
+                <div class="row g-4">
+                    <!-- Type -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold">Interview Track</label>
+                        <select name="type" id="interviewType" class="form-select form-glass" required>
+                            <option value="Technical" selected>Technical Round</option>
+                            <option value="Behavioral">Behavioral (STAR Method)</option>
+                            <option value="HR">HR & Fitment Round</option>
+                            <option value="Coding">Live Coding Round</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold">Experience Level</label>
+                        <select name="experience" class="form-select form-glass" required>
+                            <option value="Fresher" selected>Fresher / Graduate Entry</option>
+                            <option value="1-3 Years">1 - 3 Years (Junior)</option>
+                            <option value="3-5 Years">3 - 5 Years (Mid-Level)</option>
+                            <option value="Experienced">Experienced (Senior / Lead)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Role -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold">Target Position</label>
+                        <select name="role" class="form-select form-glass" required>
+                            <option value="Software Engineer" selected>Software Engineer</option>
+                            <option value="Full Stack Developer">Full Stack Developer</option>
+                            <option value="Data Analyst">Data Analyst</option>
+                            <option value="AI Engineer">AI Engineer</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
+                            <option value="UI/UX Designer">UI/UX Designer</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Company -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold">Target Company</label>
+                        <select name="company" class="form-select form-glass" required>
+                            <option value="Google" selected>Google</option>
+                            <option value="Amazon">Amazon</option>
+                            <option value="Microsoft">Microsoft</option>
+                            <option value="TCS">TCS</option>
+                            <option value="Infosys">Infosys</option>
+                            <option value="Zoho">Zoho</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="text-white opacity-10 my-4">
+
+                <button type="submit" class="btn-premium w-100 py-3">
+                    <i class="fas fa-magic me-2"></i>Generate Questions & Begin
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Generating Screen -->
+<div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background: rgba(8,11,17,0.9); z-index: 2000;">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3.5rem; height: 3.5rem; border-width: 0.35em;"></div>
+    <h4 class="fw-bold text-white text-gradient-neon">Assembling Tailored Interview</h4>
+    <p class="text-secondary text-center max-width-400 mt-2 px-3">Calling Groq AI to formulate 5 distinct interview questions matching your selections...</p>
+</div>
+
+<!-- ========================================== -->
+<!-- 2. REPORT VIEW MODE                        -->
+<!-- ========================================== -->
+{% elif report_view %}
+<div class="row g-4 fade-in">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold">Interview Performance Report</h2>
+            <p class="text-secondary mb-0">Role: {{ interview.role }} | Company: {{ interview.company }} | Track: {{ interview.type }}</p>
+        </div>
+        <a href="{{ url_for('download_report_pdf', id=interview.id) }}" class="btn-premium">
+            <i class="fas fa-file-pdf me-2"></i>Download PDF Report
+        </a>
+    </div>
+
+    <!-- Scores Widget -->
+    <div class="col-lg-4">
+        <div class="glass-panel p-4 text-center h-100 d-flex flex-column justify-content-center">
+            <div class="d-inline-flex position-relative align-items-center justify-content-center mx-auto mb-4" style="width: 150px; height: 150px;">
+                <!-- Ring Glow -->
+                <svg width="150" height="150" viewBox="0 0 150 150" class="position-absolute">
+                    <circle cx="75" cy="75" r="65" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none"/>
+                    <circle cx="75" cy="75" r="65" stroke="var(--accent-cyan)" stroke-width="8" fill="none"
+                            stroke-dasharray="408" stroke-dashoffset="{{ 408 - (408 * interview.overall_score) / 100 }}"
+                            stroke-linecap="round" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1s ease-in-out;"/>
+                </svg>
+                <div class="text-center">
+                    <h1 class="display-4 fw-bold mb-0 text-gradient-neon">{{ interview.overall_score }}%</h1>
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Overall Score</small>
+                </div>
+            </div>
+            
+            <hr class="text-white opacity-10 my-3">
+            
+            <!-- Dimension Breakdown -->
+            <div class="text-start">
+                <h6 class="fw-bold mb-3">Core Dimension Scores:</h6>
+                
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-secondary small mb-1">
+                        <span>Communication</span>
+                        <span class="fw-bold">{{ interview.score_communication }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-info" style="width: {{ interview.score_communication }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-secondary small mb-1">
+                        <span>Technical Knowledge</span>
+                        <span class="fw-bold">{{ interview.score_technical }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-primary" style="width: {{ interview.score_technical }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-secondary small mb-1">
+                        <span>Confidence & Delivery</span>
+                        <span class="fw-bold">{{ interview.score_confidence }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-warning" style="width: {{ interview.score_confidence }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-secondary small mb-1">
+                        <span>Problem Solving</span>
+                        <span class="fw-bold">{{ interview.score_problem_solving }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-danger" style="width: {{ interview.score_problem_solving }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between text-secondary small mb-1">
+                        <span>Professionalism</span>
+                        <span class="fw-bold">{{ interview.score_professionalism }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                        <div class="progress-bar bg-success" style="width: {{ interview.score_professionalism }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Detailed Feedbacks -->
+    <div class="col-lg-8">
+        <div class="glass-panel p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-gradient-accent"><i class="fas fa-thumbs-up me-2"></i>Key Strengths</h5>
+            <p class="text-secondary mb-0">{{ report.feedback_strengths }}</p>
+        </div>
+        
+        <div class="glass-panel p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-danger"><i class="fas fa-triangle-exclamation me-2"></i>Areas to Improve</h5>
+            <p class="text-secondary mb-0">{{ report.feedback_weaknesses }}</p>
+        </div>
+
+        <div class="glass-panel p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-gradient-neon"><i class="fas fa-graduation-cap me-2"></i>Coach Recommendations</h5>
+            <p class="text-secondary mb-0">{{ report.recommendations }}</p>
+        </div>
+    </div>
+
+    <!-- Recommended Resources -->
+    <div class="col-12 mb-4">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-book-open me-2 text-primary"></i>Suggested Learning Resources</h5>
+            <div class="row g-3">
+                {% for res in resources %}
+                    <div class="col-md-4">
+                        <div class="glass-panel p-3 bg-opacity-20 d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <h6 class="fw-bold text-white mb-2">{{ res.title }}</h6>
+                                <p class="text-muted small mb-3">Self-paced prep material suggested by the AI based on your responses.</p>
+                            </div>
+                            <a href="{{ res.url }}" target="_blank" class="btn btn-premium-outline btn-sm align-self-start"><i class="fas fa-external-link-alt me-1"></i>Visit Resource</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Transcript Q&A details -->
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-align-left me-2 text-info"></i>Interview Q&A Transcript</h5>
+            {% for qa in transcript %}
+                <div class="mb-4 pb-3 border-bottom border-light border-opacity-10">
+                    <h6 class="fw-bold text-gradient-neon mb-2">Q{{ loop.index }}: {{ qa.question }}</h6>
+                    <div class="p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                        <p class="mb-0 text-secondary fst-italic">"{{ qa.answer }}"</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 3. ACTIVE INTERVIEW SESSION MODE           -->
+<!-- ========================================== -->
+{% else %}
+<div class="row g-4 fade-in">
+    <!-- Left panel (Interviewer State) -->
+    <div class="col-lg-5">
+        <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-gradient-neon text-uppercase" style="font-size: 0.75rem;">{{ interview.type }} ROUND</span>
+                    <span class="text-secondary small fw-bold" id="questionProgress">QUESTION {{ question_number }} OF {{ total_questions }}</span>
+                </div>
+                
+                <h5 class="fw-bold text-white mb-3">AI Interviewer:</h5>
+                
+                <div class="p-3 rounded mb-4" style="background: rgba(139, 92, 246, 0.08); border-left: 4px solid var(--accent-purple);">
+                    <h5 class="fw-medium text-secondary mb-0 leading-15 fst-italic" id="currentQuestionText">
+                        "{{ current_question }}"
+                    </h5>
+                </div>
+            </div>
+
+            <!-- Voice Activity Waveform Widget -->
+            <div class="my-4">
+                <div class="audio-wave d-none mb-3" id="audioWave">
+                    <div class="wave-bar" style="height: 10px;"></div>
+                    <div class="wave-bar" style="height: 15px;"></div>
+                    <div class="wave-bar" style="height: 25px;"></div>
+                    <div class="wave-bar" style="height: 35px;"></div>
+                    <div class="wave-bar" style="height: 15px;"></div>
+                    <div class="wave-bar" style="height: 10px;"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between text-secondary small px-1">
+                    <span id="speechStatusText"><i class="fas fa-keyboard"></i> Manual Input Active</span>
+                    <span class="d-none" id="speechConfidence"><i class="fas fa-signal"></i> Signal: --</span>
+                </div>
+                
+                <!-- Speech Metrics (Filler Words Tracker) -->
+                <div class="d-none mt-3 p-3 rounded" id="speechMetrics" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                    <h6 class="small fw-bold text-white mb-2"><i class="fas fa-chart-line me-1 text-info"></i>Speech Metrics (Real-time):</h6>
+                    <div class="row g-2 text-center text-secondary small">
+                        <div class="col-4 border-end border-light border-opacity-10">
+                            <span class="d-block fw-bold text-white" id="wordCountLabel">0</span>
+                            Words
+                        </div>
+                        <div class="col-4 border-end border-light border-opacity-10">
+                            <span class="d-block fw-bold text-danger" id="fillerWordLabel">0</span>
+                            Filler Words
+                        </div>
+                        <div class="col-4">
+                            <span class="d-block fw-bold text-info" id="clarityLabel">Excellent</span>
+                            Clarity
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> You can use the mic button to answer via Speech-to-Text, or edit in the workspace directly.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right panel (Workspace Area) -->
+    <div class="col-lg-7">
+        <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Candidate Response Workspace</h5>
+                    
+                    <!-- Coding Language Dropdown selector if coding session -->
+                    {% if interview.type == 'Coding' %}
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-secondary small fw-bold">Language:</small>
+                            <select id="languageSelect" class="form-select form-select-sm form-glass py-1" style="width: 120px;">
+                                <option value="python" selected>Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                            </select>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Coding Mode Interface vs Written Mode Interface -->
+                {% if interview.type == 'Coding' %}
+                    <div class="editor-container mb-3">
+                        <div class="editor-header">
+                            <span class="text-secondary small font-monospace"><i class="fas fa-file-code me-1"></i> solution.py</span>
+                            <span class="badge bg-gradient-neon text-uppercase" style="font-size: 0.65rem;">Dark Dracula Theme</span>
+                        </div>
+                        <textarea id="codeEditorArea" class="form-control d-none"></textarea>
+                    </div>
+                {% else %}
+                    <div class="mb-3">
+                        <textarea id="answerTextarea" class="form-control form-glass" rows="15" placeholder="Click 'Record Speech' to translate voice input directly, or start typing your structured solution here..." style="font-size: 0.95rem; line-height: 1.5; resize: none;"></textarea>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Controls row -->
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 border-top border-light border-opacity-10">
+                <!-- Recording triggers -->
+                <div>
+                    <button type="button" id="micBtn" class="btn btn-premium-outline px-4 py-3">
+                        <i class="fas fa-microphone me-2 text-danger" id="micIcon"></i><span id="micLabel">Record Speech</span>
+                    </button>
+                </div>
+                
+                <!-- Submission triggers -->
+                <div>
+                    <button type="button" id="submitAnswerBtn" class="btn-premium px-5 py-3">
+                        Submit Answer <i class="fas fa-chevron-right ms-2" id="submitIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Custom controllers -->
+<script src="{{ url_for('static', filename='js/speech.js') }}"></script>
+<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+
+<script>
+// Toggle Generating Overlay screen on form submits
+function showLoadingScreen() {
+    document.getElementById('loadingOverlay').classList.remove('d-none');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Only compile runtime objects if in Active Session state
+    {% if not setup and not report_view %}
+        const interviewId = {{ interview.id }};
+        const interviewType = "{{ interview.type }}";
+        
+        let activeEditor = null;
+        let recordingTimer = null;
+
+        // 1. Setup Coding Editor if Active
+        if (interviewType === 'Coding') {
+            window.codeEditorManager.init('codeEditorArea', 'python');
+            
+            const langSelect = document.getElementById('languageSelect');
+            if (langSelect) {
+                langSelect.addEventListener('change', (e) => {
+                    const selectedLang = e.target.value;
+                    window.codeEditorManager.setLanguage(selectedLang);
+                    
+                    const headerFile = document.querySelector('.editor-header .font-monospace');
+                    if (headerFile) {
+                        const exts = { python: 'py', javascript: 'js', java: 'java', cpp: 'cpp' };
+                        headerFile.innerHTML = `<i class="fas fa-file-code me-1"></i> solution.${exts[selectedLang]}`;
+                    }
+                });
+            }
+        }
+
+        // 2. Setup Mic Listeners
+        const micBtn = document.getElementById('micBtn');
+        const micIcon = document.getElementById('micIcon');
+        const micLabel = document.getElementById('micLabel');
+        const audioWave = document.getElementById('audioWave');
+        const confidenceText = document.getElementById('speechConfidence');
+        const speechStatus = document.getElementById('speechStatusText');
+        const speechMetrics = document.getElementById('speechMetrics');
+
+        // Speech Recognition manager logic hooks
+        if (window.voiceManager) {
+            window.voiceManager.onStatusChange((status) => {
+                if (status === 'recording') {
+                    micBtn.classList.remove('btn-premium-outline');
+                    micBtn.classList.add('btn-danger', 'text-white');
+                    micLabel.textContent = 'Stop Recording';
+                    micIcon.className = 'fas fa-microphone-slash me-2';
+                    audioWave.classList.remove('d-none');
+                    audioWave.classList.add('active');
+                    confidenceText.classList.remove('d-none');
+                    speechMetrics.classList.remove('d-none');
+                    speechStatus.innerHTML = '<i class="fas fa-microphone text-danger"></i> Speaking...';
+                } else {
+                    micBtn.classList.remove('btn-danger', 'text-white');
+                    micBtn.classList.add('btn-premium-outline');
+                    micLabel.textContent = 'Record Speech';
+                    micIcon.className = 'fas fa-microphone me-2 text-danger';
+                    audioWave.classList.add('d-none');
+                    audioWave.classList.remove('active');
+                    speechStatus.innerHTML = '<i class="fas fa-keyboard"></i> Manual Input Active';
+                }
+            });
+
+            window.voiceManager.onTextChange((text, isFinal) => {
+                // Update workspace target values
+                if (interviewType === 'Coding') {
+                    // Append speech text to Code editor at cursor position or bottom
+                    if (isFinal) {
+                        const currentCode = window.codeEditorManager.getCode();
+                        window.codeEditorManager.setCode(currentCode + "\n# " + text);
+                    }
+                } else {
+                    document.getElementById('answerTextarea').value = text;
+                }
+                
+                // Track Speech Metrics
+                const analysis = VoiceRecognitionManager.analyzeSpeechClarity(text);
+                document.getElementById('wordCountLabel').textContent = analysis.wordCount;
+                document.getElementById('fillerWordLabel').textContent = analysis.fillerWordCount;
+                
+                const clarity = document.getElementById('clarityLabel');
+                clarity.textContent = analysis.quality;
+                if (analysis.quality === 'Excellent') {
+                    clarity.className = 'd-block fw-bold text-success';
+                } else if (analysis.quality === 'Moderate') {
+                    clarity.className = 'd-block fw-bold text-warning';
+                } else {
+                    clarity.className = 'd-block fw-bold text-danger';
+                }
+
+                // Confidence display
+                const confidence = Math.round(window.voiceManager.getAverageConfidence() * 100);
+                confidenceText.innerHTML = `<i class="fas fa-signal"></i> Confidence: ${confidence}%`;
+            });
+
+            micBtn.addEventListener('click', () => {
+                let currentVal = '';
+                if (interviewType !== 'Coding') {
+                    currentVal = document.getElementById('answerTextarea').value;
+                }
+                window.voiceManager.toggle(currentVal);
+            });
+        }
+
+        // 3. Submit Event Handling
+        const submitBtn = document.getElementById('submitAnswerBtn');
+        const submitIcon = document.getElementById('submitIcon');
+        
+        submitBtn.addEventListener('click', async () => {
+            // Stop voice recording if active
+            if (window.voiceManager) {
+                window.voiceManager.stop();
+            }
+
+            let answerValue = '';
+            if (interviewType === 'Coding') {
+                answerValue = window.codeEditorManager.getCode();
+            } else {
+                answerValue = document.getElementById('answerTextarea').value;
+            }
+
+            answerValue = answerValue.trim();
+            if (!answerValue) {
+                showToast('Please type or record an answer before submitting.', 'warning');
+                return;
+            }
+
+            // Spinner styling
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Submitting Answer...';
+
+            try {
+                const response = await fetch(`/api/interview/${interviewId}/answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answer: answerValue })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.finished) {
+                        showToast('Interview completed! Loading evaluation report...', 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 1000);
+                    } else {
+                        showToast('Answer recorded successfully. Next question generated.', 'success');
+                        
+                        // Increment Question Index display
+                        const progressSpan = document.getElementById('questionProgress');
+                        const matches = progressSpan.textContent.match(/\d+/g);
+                        if (matches && matches.length >= 2) {
+                            const current = parseInt(matches[0]) + 1;
+                            const total = matches[1];
+                            progressSpan.textContent = `QUESTION ${current} OF ${total}`;
+                        }
+
+                        // Set next question
+                        const questionHeader = document.getElementById('currentQuestionText');
+                        questionHeader.textContent = `"${data.next_question}"`;
+
+                        // Reset workspace and forms
+                        if (interviewType === 'Coding') {
+                            const currentLang = document.getElementById('languageSelect').value;
+                            window.codeEditorManager.setLanguage(currentLang);
+                        } else {
+                            document.getElementById('answerTextarea').value = '';
+                        }
+
+                        // Reset metrics widgets
+                        document.getElementById('wordCountLabel').textContent = '0';
+                        document.getElementById('fillerWordLabel').textContent = '0';
+                        document.getElementById('clarityLabel').textContent = 'Excellent';
+                        document.getElementById('clarityLabel').className = 'd-block fw-bold text-success';
+                        
+                        // Restore submit btn styling
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Submit Answer <i class="fas fa-chevron-right ms-2" id="submitIcon"></i>';
+                    }
+                } else {
+                    showToast(data.message || 'Submission failed.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Answer <i class="fas fa-chevron-right ms-2" id="submitIcon"></i>';
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Failed to record response. Network error occurred.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Answer <i class="fas fa-chevron-right ms-2" id="submitIcon"></i>';
+            }
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}

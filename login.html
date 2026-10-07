@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}Login - InterviewAI{% endblock %}
+
+{% block main_content %}
+<div class="auth-page-wrapper">
+    <!-- Animated Background Particles -->
+    <div class="particles-container" id="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Glow Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+        <div class="row w-100 justify-content-center align-items-center g-0" style="max-width: 900px;">
+
+            <!-- Left Brand Panel -->
+            <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center p-5 auth-left-panel">
+                <div class="mb-4">
+                    <div class="brand-logo-large mb-4">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h2 class="fw-bold text-white display-6 mb-3" style="font-family: var(--font-heading);">InterviewAI</h2>
+                    <p class="text-white-50 mb-4">The most advanced AI-powered interview preparation platform.</p>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="feature-pill"><i class="fas fa-microphone-lines"></i></div>
+                        <span class="text-white-75 small">Real-time Speech Analysis</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="feature-pill"><i class="fas fa-code"></i></div>
+                        <span class="text-white-75 small">Live Coding Environment</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="feature-pill"><i class="fas fa-chart-line"></i></div>
+                        <span class="text-white-75 small">Detailed Performance Reports</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="feature-pill"><i class="fas fa-robot"></i></div>
+                        <span class="text-white-75 small">Groq Llama 3 AI Coach</span>
+                    </div>
+                </div>
+
+                <div class="auth-stats-row mt-5 pt-4 border-top border-white border-opacity-10">
+                    <div class="row text-center g-0">
+                        <div class="col-4">
+                            <div class="stat-num text-white fw-bold fs-4" data-target="50000">0</div>
+                            <div class="text-white-50" style="font-size:0.7rem;">Users</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-num text-white fw-bold fs-4" data-target="200000">0</div>
+                            <div class="text-white-50" style="font-size:0.7rem;">Interviews</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-num text-white fw-bold fs-4" data-target="95">0</div>
+                            <div class="text-white-50" style="font-size:0.7rem;">% ATS Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Login Card -->
+            <div class="col-lg-7 col-md-9 col-12">
+                <div class="auth-card glass-panel p-5 rounded-4">
+                    <!-- Mobile Logo -->
+                    <div class="text-center d-lg-none mb-4">
+                        <a href="{{ url_for('landing') }}" class="text-gradient-neon fw-bold fs-3">
+                            <i class="fas fa-brain me-2"></i>InterviewAI
+                        </a>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="fw-bold text-white mb-1">Welcome back 👋</h3>
+                        <p class="text-secondary small">Sign in to continue your interview preparation journey</p>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show mb-3 py-2 px-3" style="font-size: 0.85rem; background: rgba({{ '220,38,38' if category == 'danger' else '16,185,129' }}, 0.15); border: 1px solid rgba({{ '220,38,38' if category == 'danger' else '16,185,129' }}, 0.3); color: white; border-radius: 8px;" role="alert">
+                                    <i class="fas fa-{{ 'exclamation-circle' if category == 'danger' else 'check-circle' }} me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('login') }}" method="POST" id="loginForm">
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label text-secondary fw-semibold" style="font-size:0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <input type="email" id="email" name="email" class="auth-input" placeholder="your@email.com" required autocomplete="email">
+                            </div>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="password" class="form-label text-secondary fw-semibold mb-0" style="font-size:0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Password</label>
+                                <a href="{{ url_for('forgot_password') }}" class="text-gradient-neon" style="font-size:0.8rem;">Forgot password?</a>
+                            </div>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <input type="password" id="password" name="password" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+                                <button type="button" class="toggle-pwd" onclick="togglePwd('password', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Demo Credentials -->
+                        <div class="demo-credentials mb-4 p-3 rounded-3 text-center" style="background: rgba(99,102,241,0.08); border: 1px dashed rgba(99,102,241,0.3);">
+                            <p class="text-secondary mb-2" style="font-size:0.8rem;"><i class="fas fa-info-circle me-1 text-primary"></i>Demo Credentials</p>
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="button" class="demo-fill-btn" onclick="fillDemo('admin@interview.ai','Admin@123')">
+                                    <i class="fas fa-user-shield me-1"></i>Admin Login
+                                </button>
+                                <button type="button" class="demo-fill-btn" onclick="fillDemo('demo@test.com','demo123')">
+                                    <i class="fas fa-user me-1"></i>User Demo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-auth-submit w-100 py-3 mb-4" id="loginBtn">
+                            <span class="btn-text"><i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard</span>
+                            <span class="btn-loader d-none"><span class="spinner-border spinner-border-sm me-2"></span>Authenticating...</span>
+                        </button>
+
+                        <p class="text-center text-secondary mb-0" style="font-size:0.85rem;">
+                            New to InterviewAI? <a href="{{ url_for('register') }}" class="text-gradient-neon fw-bold">Create Free Account →</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==========================================
+   AUTH PAGE SPECIFIC STYLES
+   ========================================== */
+.auth-page-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #060912 0%, #0d0f1e 40%, #080b15 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Orbs */
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,0.2), transparent 70%);
+    top: -150px; left: -100px;
+    animation-delay: 0s;
+}
+.orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%);
+    bottom: -100px; right: -50px;
+    animation-delay: 3s;
+}
+.orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(6,182,212,0.12), transparent 70%);
+    top: 40%; left: 40%;
+    animation-delay: 6s;
+}
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -30px) scale(1.05); }
+    66% { transform: translate(-15px, 20px) scale(0.95); }
+}
+
+/* Particles */
+.particles-container { position: absolute; inset: 0; pointer-events: none; }
+.particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: rgba(99,102,241,0.6);
+    border-radius: 50%;
+    animation: particleDrift linear infinite;
+}
+.particle:nth-child(1)  { left: 10%; animation-duration: 12s; animation-delay: 0s;   width:2px; height:2px; }
+.particle:nth-child(2)  { left: 25%; animation-duration: 18s; animation-delay: 2s;   background: rgba(139,92,246,0.5); }
+.particle:nth-child(3)  { left: 40%; animation-duration: 14s; animation-delay: 4s;   width:4px; height:4px; }
+.particle:nth-child(4)  { left: 55%; animation-duration: 20s; animation-delay: 1s;   background: rgba(6,182,212,0.5); }
+.particle:nth-child(5)  { left: 70%; animation-duration: 16s; animation-delay: 3s;   width:2px; height:2px; }
+.particle:nth-child(6)  { left: 85%; animation-duration: 11s; animation-delay: 5s;   background: rgba(139,92,246,0.4); }
+.particle:nth-child(7)  { left: 15%; animation-duration: 22s; animation-delay: 7s;   width:5px; height:5px; opacity:0.3; }
+.particle:nth-child(8)  { left: 60%; animation-duration: 13s; animation-delay: 9s;   background: rgba(99,102,241,0.3); }
+.particle:nth-child(9)  { left: 35%; animation-duration: 17s; animation-delay: 11s;  width:2px; height:2px; }
+.particle:nth-child(10) { left: 80%; animation-duration: 19s; animation-delay: 6s;   background: rgba(6,182,212,0.4); }
+@keyframes particleDrift {
+    0%   { bottom: -10px; opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.8; }
+    100% { bottom: 110vh; opacity: 0; transform: translateX(30px); }
+}
+
+/* Left Panel */
+.auth-left-panel {
+    background: linear-gradient(160deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%);
+    border-radius: 24px 0 0 24px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-right: none;
+    min-height: 580px;
+}
+.brand-logo-large {
+    width: 72px; height: 72px;
+    background: var(--gradient-accent);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: white;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.4);
+    animation: logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(99,102,241,0.4); }
+    50% { box-shadow: 0 8px 48px rgba(139,92,246,0.6); }
+}
+.feature-pill {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent-cyan); font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.text-white-75 { color: rgba(255,255,255,0.75) !important; }
+
+/* Auth Card */
+.auth-card {
+    border-radius: 0 24px 24px 0 !important;
+    background: rgba(13, 20, 38, 0.65) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    min-height: 580px;
+    animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (max-width: 991px) {
+    .auth-card { border-radius: 24px !important; }
+}
+@keyframes cardSlideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Input Wrappers */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    z-index: 1;
+    transition: color 0.2s;
+}
+.auth-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    color: var(--text-primary);
+    padding: 12px 44px 12px 40px;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    outline: none;
+}
+.auth-input:focus {
+    background: rgba(255,255,255,0.07);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    color: white;
+}
+.auth-input:focus ~ .input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: var(--accent-blue);
+}
+.auth-input::placeholder { color: rgba(255,255,255,0.2); }
+.toggle-pwd {
+    position: absolute;
+    right: 12px;
+    background: none; border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+}
+.toggle-pwd:hover { color: var(--accent-blue); }
+
+/* Demo Credentials */
+.demo-fill-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.demo-fill-btn:hover {
+    background: rgba(99,102,241,0.2);
+    border-color: rgba(99,102,241,0.4);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Submit Button */
+.btn-auth-submit {
+    background: var(--gradient-accent);
+    color: white; border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-auth-submit::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--gradient-neon);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.btn-auth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(99,102,241,0.4);
+}
+.btn-auth-submit:hover::before { opacity: 1; }
+.btn-auth-submit:active { transform: translateY(0); }
+.btn-auth-submit .btn-text,
+.btn-auth-submit .btn-loader { position: relative; z-index: 1; }
+
+/* Stat counter animation */
+.stat-num { font-family: var(--font-heading); }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Password visibility toggle
+function togglePwd(fieldId, btn) {
+    const field = document.getElementById(fieldId);
+    const icon  = btn.querySelector('i');
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        field.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Demo credential auto-fill
+function fillDemo(email, password) {
+    const emailField    = document.getElementById('email');
+    const passwordField = document.getElementById('password');
+    
+    // Animated typewriter fill
+    emailField.value = '';
+    passwordField.value = '';
+    
+    let i = 0;
+    const typeEmail = setInterval(() => {
+        emailField.value += email[i];
+        i++;
+        if (i >= email.length) {
+            clearInterval(typeEmail);
+            let j = 0;
+            const typePass = setInterval(() => {
+                passwordField.value += password[j];
+                j++;
+                if (j >= password.length) clearInterval(typePass);
+            }, 40);
+        }
+    }, 30);
+    
+    // Trigger input events for styling
+    emailField.dispatchEvent(new Event('input'));
+    showToast('Demo credentials filled! Click Sign In to proceed.', 'success');
+}
+
+// Submit button loading state
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const btn    = document.getElementById('loginBtn');
+    const text   = btn.querySelector('.btn-text');
+    const loader = btn.querySelector('.btn-loader');
+    text.classList.add('d-none');
+    loader.classList.remove('d-none');
+    btn.disabled = true;
+});
+
+// Animated stat counters on left panel
+function animateCounter(el) {
+    const target = parseInt(el.getAttribute('data-target'));
+    const duration = 2000;
+    const step = target / (duration / 16);
+    let current = 0;
+    const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        el.textContent = target >= 1000
+            ? Math.floor(current).toLocaleString()
+            : Math.floor(current);
+    }, 16);
+}
+
+// Trigger counters when visible
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateCounter(entry.target);
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-num').forEach(el => observer.observe(el));
+
+// Input focus label elevation effect
+document.querySelectorAll('.auth-input').forEach(input => {
+    input.addEventListener('focus', () => {
+        input.parentElement.parentElement.querySelector('.form-label')?.classList.add('text-primary');
+    });
+    input.addEventListener('blur', () => {
+        input.parentElement.parentElement.querySelector('.form-label')?.classList.remove('text-primary');
+    });
+});
+</script>
+{% endblock %}

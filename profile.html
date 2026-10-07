@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - InterviewAI{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12 mb-4">
+        <h2 class="fw-bold"><i class="fas fa-user-cog me-2 text-gradient-accent"></i>Account Settings</h2>
+        <p class="text-secondary">Manage your user profile credentials and target interview goals.</p>
+    </div>
+</div>
+
+<div class="row g-4 fade-in">
+    <!-- Left Profile Summary Card -->
+    <div class="col-lg-4">
+        <div class="glass-panel p-4 text-center">
+            <div class="position-relative d-inline-block mb-3">
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Profile Pic" class="rounded-circle border border-3 border-primary shadow" style="width: 140px; height: 140px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-gradient-accent d-flex align-items-center justify-content-center text-white fw-bold shadow mx-auto" style="width: 140px; height: 140px; font-size: 3.5rem;">
+                        {{ user.name[0] | upper }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <h4 class="fw-bold mb-1">{{ user.name }}</h4>
+            <p class="text-secondary small mb-3"><i class="fas fa-envelope me-1"></i>{{ user.email }}</p>
+            
+            <div class="badge bg-gradient-neon px-3 py-2 rounded-pill mb-4 text-uppercase fw-bold" style="font-size: 0.75rem;">
+                Target: {{ user.target_role or 'Software Engineer' }}
+            </div>
+            
+            <hr class="text-white opacity-10">
+            
+            <div class="row text-center mt-3">
+                <div class="col-6 border-end border-light border-opacity-10">
+                    <h5 class="fw-bold mb-0">{{ user.xp }}</h5>
+                    <small class="text-muted">Total XP</small>
+                </div>
+                <div class="col-6">
+                    <h5 class="fw-bold mb-0">{{ user.streak }} <i class="fas fa-fire text-warning"></i></h5>
+                    <small class="text-muted">Day Streak</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Profile Form Card -->
+    <div class="col-lg-8">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-edit me-2 text-primary"></i>Update Profile Details</h5>
+            
+            <form action="{{ url_for('profile') }}" method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-secondary small fw-bold">Full Name</label>
+                        <input type="text" name="name" class="form-control form-glass" value="{{ user.name }}" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-secondary small fw-bold">Email Address (Read-only)</label>
+                        <input type="email" class="form-control form-glass opacity-50" value="{{ user.email }}" readonly>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-secondary small fw-bold">Target Interview Role</label>
+                        <select name="target_role" class="form-select form-glass">
+                            <option value="Software Engineer" {% if user.target_role == 'Software Engineer' %}selected{% endif %}>Software Engineer</option>
+                            <option value="Full Stack Developer" {% if user.target_role == 'Full Stack Developer' %}selected{% endif %}>Full Stack Developer</option>
+                            <option value="Data Analyst" {% if user.target_role == 'Data Analyst' %}selected{% endif %}>Data Analyst</option>
+                            <option value="AI Engineer" {% if user.target_role == 'AI Engineer' %}selected{% endif %}>AI Engineer</option>
+                            <option value="DevOps Engineer" {% if user.target_role == 'DevOps Engineer' %}selected{% endif %}>DevOps Engineer</option>
+                            <option value="UI/UX Designer" {% if user.target_role == 'UI/UX Designer' %}selected{% endif %}>UI/UX Designer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-secondary small fw-bold">Upload Profile Picture</label>
+                        <input type="file" name="profile_pic" class="form-control form-glass" accept="image/*">
+                    </div>
+                    
+                    <div class="col-12 mb-4">
+                        <label class="form-label text-secondary small fw-bold">Your Skills (Comma-separated)</label>
+                        <textarea name="skills" class="form-control form-glass" rows="3" placeholder="Python, JavaScript, SQL, AWS, React, etc.">{{ user.skills }}</textarea>
+                        <small class="text-muted">Listed skills help customize interview questions and resume keyword checks.</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn-premium px-4">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

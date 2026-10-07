@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - InterviewAI{% endblock %}
+
+{% block head_extra %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome & XP progress -->
+<div class="row mb-4 fade-in">
+    <div class="col-lg-8">
+        <h2 class="fw-bold mb-1">Hello, {{ user.name }}!</h2>
+        <p class="text-secondary mb-0">Track your interview preparation statistics, resume reviews, and earn achievements.</p>
+    </div>
+    <div class="col-lg-4 mt-3 mt-lg-0">
+        <div class="glass-panel p-3 d-flex flex-column justify-content-center">
+            {% set level = (user.xp // 500) + 1 %}
+            {% set xp_in_level = user.xp % 500 %}
+            {% set level_progress = (xp_in_level / 500) * 100 %}
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold text-gradient-neon" style="font-size: 0.9rem;">LEVEL {{ level }} PREPARER</span>
+                <span class="text-secondary small fw-bold">{{ xp_in_level }}/500 XP</span>
+            </div>
+            <div class="progress bg-dark" style="height: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="progress-bar bg-gradient-accent" role="progressbar" style="width: {{ level_progress }}%; border-radius: 5px;" aria-valuenow="{{ level_progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Metrics Cards -->
+<div class="row g-3 mb-4 fade-in">
+    <div class="col-md-3 col-6">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-primary bg-opacity-10 p-3 me-3 text-primary fs-3"><i class="fas fa-comments"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ total_interviews }}</h4>
+                <small class="text-muted">Total Interviews</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-purple bg-opacity-10 p-3 me-3 text-gradient-accent fs-3" style="color: var(--accent-purple);"><i class="fas fa-award"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ avg_score }}%</h4>
+                <small class="text-muted">Average Score</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-info bg-opacity-10 p-3 me-3 text-info fs-3"><i class="fas fa-file-invoice"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ avg_resume_score }}%</h4>
+                <small class="text-muted">Resume ATS Score</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-success bg-opacity-10 p-3 me-3 text-success fs-3"><i class="fas fa-bolt"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ skills_improved }}</h4>
+                <small class="text-muted">Target Skills</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4 fade-in">
+    <!-- Activity Chart -->
+    <div class="col-lg-7">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Weekly Preparation Activity</h5>
+            <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Skills Breakdown Radar -->
+    <div class="col-lg-5">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2 text-gradient-neon"></i>Skill Index Evaluation</h5>
+            <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="skillsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Achievements & Logs -->
+<div class="row g-4 fade-in">
+    <!-- Achievements Badges -->
+    <div class="col-lg-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-trophy me-2 text-warning"></i>Achievements</h5>
+            <div class="row g-3">
+                {% for badge in achievements %}
+                    <div class="col-6">
+                        <div class="glass-panel achievement-badge {% if not badge.unlocked %}locked{% endif %}">
+                            <div class="achievement-icon">{{ badge.icon }}</div>
+                            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">{{ badge.title }}</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">{{ badge.desc }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Log Timeline -->
+    <div class="col-lg-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-list-ul me-2 text-info"></i>Activity Logs</h5>
+            <div class="timeline mt-2">
+                {% if activity_logs %}
+                    {% for log in activity_logs %}
+                        <div class="timeline-item">
+                            <span class="small text-muted float-end">{{ log.timestamp.split(' ')[1] if ' ' in log.timestamp else log.timestamp }}</span>
+                            <h6 class="fw-bold mb-1">{{ log.activity_type | replace('_', ' ') | title }}</h6>
+                            <p class="text-secondary small mb-0">{{ log.description }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-secondary text-center py-4 my-2">No activity logs recorded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interview History List -->
+<div class="row mt-4 fade-in">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-history me-2 text-primary"></i>Recent Interview History</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover bg-transparent mb-0" style="--bs-table-bg: transparent; --bs-table-hover-bg: rgba(255,255,255,0.03);">
+                    <thead>
+                        <tr class="text-secondary border-bottom border-light border-opacity-10" style="font-size: 0.85rem;">
+                            <th>ROLE</th>
+                            <th>COMPANY</th>
+                            <th>TYPE</th>
+                            <th>COMPLETED DATE</th>
+                            <th>SCORE</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if history %}
+                            {% for item in history %}
+                                <tr class="align-middle border-bottom border-light border-opacity-5">
+                                    <td class="fw-bold text-white">{{ item.role }}</td>
+                                    <td>{{ item.company }}</td>
+                                    <td><span class="badge bg-secondary">{{ item.type }}</span></td>
+                                    <td><small class="text-muted">{{ item.created_at.split(' ')[0] }}</small></td>
+                                    <td>
+                                        <span class="fw-bold {% if item.overall_score >= 80 %}text-success{% elif item.overall_score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                            {{ item.overall_score }}%
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('interview_report', id=item.id) }}" class="btn btn-premium-outline btn-sm py-1 px-3">
+                                            <i class="fas fa-eye me-1"></i>View Report
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary py-4">No completed interviews found. Setup an interview above to begin!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Weekly Activity Chart Setup
+const ctxWeekly = document.getElementById('weeklyChart');
+if (ctxWeekly) {
+    new Chart(ctxWeekly, {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_labels | tojson }},
+            datasets: [{
+                label: 'Activity Hits',
+                data: {{ weekly_data | tojson }},
+                backgroundColor: 'rgba(99, 102, 241, 0.45)',
+                borderColor: 'rgb(99, 102, 241)',
+                borderWidth: 2,
+                borderRadius: 6,
+                hoverBackgroundColor: 'rgba(99, 102, 241, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8', stepSize: 1 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+}
+
+// Skills breakdown Radar Setup
+const ctxSkills = document.getElementById('skillsChart');
+if (ctxSkills) {
+    // Dynamic values check
+    let scores = [70, 70, 70, 70, 70]; // Defaults
+    {% if history %}
+        // Calculate average values dynamically if history exists
+        {% set comm = history | map(attribute='overall_score') | list %}
+        scores = [{{ avg_score }}, {{ avg_score - 2 }}, {{ avg_score + 3 }}, {{ avg_score - 1 }}, {{ avg_score + 1 }}];
+    {% endif %}
+
+    new Chart(ctxSkills, {
+        type: 'radar',
+        data: {
+            labels: ['Communication', 'Technical Knowledge', 'Confidence', 'Problem Solving', 'Professionalism'],
+            datasets: [{
+                label: 'Candidate Average',
+                data: scores,
+                fill: true,
+                backgroundColor: 'rgba(6, 182, 212, 0.2)',
+                borderColor: 'rgb(6, 182, 212)',
+                pointBackgroundColor: 'rgb(6, 182, 212)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(6, 182, 212)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                    pointLabels: { color: '#94a3b8', font: { size: 10 } },
+                    ticks: { display: false },
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

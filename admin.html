@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Control Panel - InterviewAI{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12 mb-4">
+        <h2 class="fw-bold text-warning"><i class="fas fa-shield-halved me-2"></i>Administration Dashboard</h2>
+        <p class="text-secondary">Monitor platform activity logs, manage registered user parameters, and view completed feedback reports.</p>
+    </div>
+</div>
+
+<!-- Admin Metrics cards -->
+<div class="row g-3 mb-4 fade-in">
+    <div class="col-md-4">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-primary bg-opacity-10 p-3 me-3 text-primary fs-3"><i class="fas fa-users"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ total_users }}</h4>
+                <small class="text-muted">Registered Users</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-success bg-opacity-10 p-3 me-3 text-success fs-3"><i class="fas fa-circle-check"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ total_runs }}</h4>
+                <small class="text-muted">Interviews Evaluated</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="glass-panel p-3 d-flex align-items-center">
+            <div class="rounded-3 bg-warning bg-opacity-10 p-3 me-3 text-warning fs-3"><i class="fas fa-gauge-high"></i></div>
+            <div>
+                <h4 class="fw-bold mb-0">{{ avg_score }}%</h4>
+                <small class="text-muted">Average Global Score</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 fade-in">
+    <!-- User Directory Table -->
+    <div class="col-12 mb-4">
+        <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-3 text-white"><i class="fas fa-users-cog me-2 text-primary"></i>User Directory</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover bg-transparent mb-0" style="--bs-table-bg: transparent; --bs-table-hover-bg: rgba(255,255,255,0.02);">
+                    <thead>
+                        <tr class="text-secondary border-bottom border-light border-opacity-10" style="font-size: 0.85rem;">
+                            <th>ID</th>
+                            <th>NAME</th>
+                            <th>EMAIL</th>
+                            <th>TARGET ROLE</th>
+                            <th>XP</th>
+                            <th>STREAK</th>
+                            <th>PRIVILEGE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for u in users %}
+                                <tr class="align-middle border-bottom border-light border-opacity-5">
+                                    <td><small class="text-muted font-monospace">#{{ u.id }}</small></td>
+                                    <td class="fw-bold text-white">{{ u.name }}</td>
+                                    <td>{{ u.email }}</td>
+                                    <td><span class="badge bg-secondary">{{ u.target_role or 'Software Engineer' }}</span></td>
+                                    <td><strong>{{ u.xp }} XP</strong></td>
+                                    <td>{{ u.streak }} days</td>
+                                    <td>
+                                        {% if u.is_admin == 1 %}
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-user-shield me-1"></i>Administrator</span>
+                                        {% else %}
+                                            <span class="badge bg-dark border border-secondary text-secondary">Candidate</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-secondary py-4">No users found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Activity Log Feed -->
+    <div class="col-lg-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3 text-white"><i class="fas fa-clipboard-list me-2 text-info"></i>Global System Activity</h5>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-dark table-sm table-hover bg-transparent mb-0" style="--bs-table-bg: transparent; font-size: 0.85rem;">
+                    <thead>
+                        <tr class="text-secondary border-bottom border-light border-opacity-10">
+                            <th>USER</th>
+                            <th>EVENT</th>
+                            <th>TIMESTAMP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if logs %}
+                            {% for log in logs %}
+                                <tr class="border-bottom border-light border-opacity-5">
+                                    <td class="fw-bold text-white">{{ log.name }}</td>
+                                    <td>
+                                        <span class="text-info">{{ log.activity_type | replace('_', ' ') | title }}</span>: 
+                                        <span class="text-secondary">{{ log.description }}</span>
+                                    </td>
+                                    <td><small class="text-muted">{{ log.timestamp }}</small></td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-secondary py-4">No activity logged.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidate Reports Archive -->
+    <div class="col-lg-6">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3 text-white"><i class="fas fa-file-pdf me-2 text-danger"></i>Performance Reports Archive</h5>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-dark table-sm table-hover bg-transparent mb-0" style="--bs-table-bg: transparent; font-size: 0.85rem;">
+                    <thead>
+                        <tr class="text-secondary border-bottom border-light border-opacity-10">
+                            <th>CANDIDATE</th>
+                            <th>FOCUS</th>
+                            <th>GRADE</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if reports %}
+                            {% for rep in reports %}
+                                <tr class="align-middle border-bottom border-light border-opacity-5">
+                                    <td class="fw-bold text-white">{{ rep.name }}</td>
+                                    <td>{{ rep.role }} ({{ rep.type }})</td>
+                                    <td><span class="fw-bold text-success">{{ rep.overall_score }}%</span></td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('download_report_pdf', id=rep.id) }}" class="btn btn-premium-outline btn-sm py-0 px-2" title="Export PDF">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary py-4">No evaluations logged.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

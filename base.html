@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InterviewAI - Master Your Interview Skills with AI{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CodeMirror CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <!-- Top Glass Header (Visible when logged out or on landing) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent py-3">
+        <div class="container">
+            <a class="navbar-brand text-gradient-neon d-flex align-items-center" href="{{ url_for('landing') }}">
+                <i class="fas fa-brain me-2 text-gradient-accent"></i>
+                <span>InterviewAI</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    {% if session.get('user_id') %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('dashboard') }}"><i class="fas fa-columns me-1"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-1"></i> {{ session.get('name') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-premium-outline ms-2 py-2 px-3" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('landing') }}#features">Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('landing') }}#pricing">Pricing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url_for('landing') }}#faq">FAQ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white me-2" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-premium py-2 px-4" href="{{ url_for('register') }}">Get Started</a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Theme Toggle Button -->
+                    <li class="nav-item ms-2">
+                        <button id="theme-toggle" class="btn btn-premium-outline rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Layout Wrapper -->
+    <div class="container-fluid px-0">
+        {% if session.get('user_id') and request.endpoint != 'landing' %}
+            <div class="dashboard-container">
+                <!-- Sidebar Navigation -->
+                <aside class="sidebar glass-panel py-4 px-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-center mb-4">
+                            {% if session.get('profile_pic') %}
+                                <img src="{{ url_for('static', filename='uploads/' + session.get('profile_pic', 'admin_avatar.png')) }}" alt="Avatar" class="rounded-circle border border-2 border-primary mb-2 shadow" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-gradient-accent d-flex align-items-center justify-content-center mx-auto mb-2 text-white shadow" style="width: 80px; height: 80px; font-size: 2rem;">
+                                    {{ session.get('name', 'U')[0] | upper }}
+                                </div>
+                            {% endif %}
+                            <h6 class="mb-0 fw-bold">{{ session.get('name') }}</h6>
+                            <small class="text-muted">{{ session.get('email') }}</small>
+                        </div>
+                        
+                        <hr class="text-white opacity-10 mb-4">
+
+                        <nav class="d-flex flex-column">
+                            <a class="sidebar-nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a class="sidebar-nav-link {% if request.endpoint == 'interview_setup' or request.endpoint == 'interview_session' or request.endpoint == 'interview_report' %}active{% endif %}" href="{{ url_for('interview_setup') }}">
+                                <i class="fas fa-comments"></i>
+                                <span>Mock Interview</span>
+                            </a>
+                            <a class="sidebar-nav-link {% if request.endpoint == 'resume_viewer' %}active{% endif %}" href="{{ url_for('resume_viewer') }}">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>Resume Analyzer</span>
+                            </a>
+                            <a class="sidebar-nav-link {% if request.endpoint == 'career_coach' %}active{% endif %}" href="{{ url_for('career_coach') }}">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Career Coach</span>
+                            </a>
+                            <a class="sidebar-nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
+                                <i class="fas fa-user-cog"></i>
+                                <span>My Profile</span>
+                            </a>
+                            
+                            {% if session.get('is_admin') == 1 %}
+                                <a class="sidebar-nav-link text-warning {% if request.endpoint == 'admin' %}active{% endif %}" href="{{ url_for('admin') }}">
+                                    <i class="fas fa-shield-halved"></i>
+                                    <span>Admin Panel</span>
+                                </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+
+                    <div>
+                        <a class="sidebar-nav-link text-danger mt-4" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sign Out</span>
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Page Content Area -->
+                <main class="dashboard-content">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show glass-panel text-white" role="alert" style="background: rgba(185, 28, 28, 0.25); border-color: rgba(239, 68, 68, 0.4);">
+                                    {{ message }}
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </main>
+            </div>
+        {% else %}
+            <!-- Unauthenticated Core View -->
+            <main>
+                <!-- Flash Messages -->
+                <div class="container mt-3">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show glass-panel text-white" role="alert" style="background: rgba(13, 20, 38, 0.8);">
+                                    {{ message }}
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                {% block main_content %}{% endblock %}
+            </main>
+        {% endif %}
+    </div>
+
+    <!-- AI FLOATING ASSISTANT WIDGET -->
+    {% if session.get('user_id') %}
+        <button id="ai-widget-toggle" class="ai-widget-button" title="Ask Assistant">
+            <i class="fas fa-robot"></i>
+        </button>
+        
+        <div id="ai-widget-drawer" class="ai-widget-drawer glass-panel">
+            <div class="ai-chat-header">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-brain me-2"></i>
+                    <div>
+                        <h6 class="mb-0 fw-bold">InterviewAI Helper</h6>
+                        <small class="text-white-50" style="font-size: 0.75rem;">Online Assistant</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" id="ai-widget-close" aria-label="Close"></button>
+            </div>
+            
+            <div class="ai-chat-messages" id="ai-widget-messages">
+                <div class="ai-message incoming">
+                    Hello! I'm your virtual career helper. Ask me anything about preparing for interviews, improving skills, or building roadmap suggestions!
+                </div>
+            </div>
+            
+            <div class="ai-chat-input-area">
+                <input type="text" id="ai-widget-input" placeholder="Ask a question..." autocomplete="off">
+                <button type="button" id="ai-widget-send"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Footer Landing (Visible only on Landing page) -->
+    {% if request.endpoint == 'landing' %}
+    <footer class="glass-panel mt-5 py-5 border-0 rounded-0" style="background: rgba(8, 11, 17, 0.95); border-top: 1px solid var(--glass-border) !important;">
+        <div class="container text-center">
+            <h4 class="text-gradient-neon fw-bold mb-3"><i class="fas fa-brain me-2"></i>InterviewAI</h4>
+            <p class="text-secondary max-width-600 mx-auto">Master interview questions, simulate real coding evaluations, analyze your resume against ATS criteria, and get tailored career counseling today.</p>
+            <hr class="my-4 text-white opacity-10">
+            <p class="text-muted mb-0">&copy; 2026 InterviewAI. Empowering applicants worldwide.</p>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror JS from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <!-- CodeMirror Clike mode (handles Java and C++) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    
+    <!-- Global Main JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

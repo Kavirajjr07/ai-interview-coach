@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Analyzer - InterviewAI{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12 mb-4">
+        <h2 class="fw-bold"><i class="fas fa-file-invoice me-2 text-gradient-accent"></i>AI Resume Analyzer</h2>
+        <p class="text-secondary">Upload your resume in PDF or DOCX format to receive an ATS match score, keyword audits, grammar checks, and improvement recommendations.</p>
+    </div>
+</div>
+
+<div class="row g-4 fade-in">
+    <!-- Left Column: Upload box -->
+    <div class="col-lg-5">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-cloud-upload-alt me-2 text-primary"></i>Upload Resume</h5>
+            
+            <form action="{{ url_for('analyze_resume') }}" method="POST" enctype="multipart/form-data" id="resumeForm" onsubmit="showAnalyzerScreen();">
+                <div class="border border-dashed border-secondary rounded-4 p-5 text-center mb-4 cursor-pointer" id="dropZone" style="border-style: dashed !important; background: rgba(255,255,255,0.01); border-color: rgba(255,255,255,0.1) !important; transition: all 0.3s ease;">
+                    <i class="fas fa-file-pdf display-4 text-gradient-neon mb-3" id="fileIcon"></i>
+                    <h6 class="fw-bold text-white mb-2" id="dragLabel">Drag & drop files here</h6>
+                    <p class="text-secondary small mb-4">Supports PDF & DOCX formats (Max 16MB)</p>
+                    
+                    <button type="button" class="btn btn-premium-outline btn-sm px-4" onclick="document.getElementById('resumeFileInput').click();">Browse Files</button>
+                    <input type="file" id="resumeFileInput" name="resume" class="d-none" accept=".pdf,.docx">
+                </div>
+                
+                <div class="d-none mb-3 p-3 rounded" id="fileDetails" style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2);">
+                    <div class="d-flex align-items-center justify-content-between text-secondary small">
+                        <span><i class="fas fa-paperclip me-2 text-info"></i><strong class="text-white" id="fileNameLabel">filename.pdf</strong></span>
+                        <button type="button" class="btn-close btn-close-white" onclick="clearFileSelection();" aria-label="Clear File"></button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-premium w-100 py-3 disabled" id="analyzeBtn">
+                    <i class="fas fa-gauge-high me-2"></i>Analyze ATS Score
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Results & History -->
+    <div class="col-lg-7">
+        <div class="glass-panel p-4 h-100">
+            <h5 class="fw-bold mb-4"><i class="fas fa-history me-2 text-gradient-neon"></i>Analysis History</h5>
+            
+            {% if analyses %}
+                <div class="accordion accordion-flush" id="analysisAccordion">
+                    {% for analysis in analyses %}
+                        <div class="accordion-item bg-transparent text-white border-bottom border-light border-opacity-10 py-3">
+                            <h2 class="accordion-header bg-transparent">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-bold shadow-none d-flex justify-content-between align-items-center gap-3 w-100 pe-3" type="button" data-bs-toggle="collapse" data-bs-target="#anal{{ analysis.id }}">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white small" style="width: 42px; height: 42px; background: {% if analysis.ats_score >= 80 %}rgba(16, 185, 129, 0.15); border: 1.5px solid var(--accent-success); color: var(--accent-success) !important;{% else %}rgba(245, 158, 11, 0.15); border: 1.5px solid var(--accent-warning); color: var(--accent-warning) !important;{% endif %}">
+                                            {{ analysis.ats_score }}%
+                                        </div>
+                                        <div class="text-start">
+                                            <h6 class="mb-0 fw-bold" style="font-size: 0.95rem;">{{ analysis.filename }}</h6>
+                                            <small class="text-muted" style="font-size: 0.75rem;">{{ analysis.created_at }}</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="anal{{ analysis.id }}" class="accordion-collapse collapse" data-bs-parent="#analysisAccordion">
+                                <div class="accordion-body text-secondary small px-1 pt-3">
+                                    
+                                    <!-- Missing Skills -->
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold text-white mb-2"><i class="fas fa-tags me-1 text-info"></i>Missing Core Skills:</h6>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% if analysis.missing_skills %}
+                                                {% for skill in analysis.missing_skills.split(',') %}
+                                                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 px-2 py-1">{{ skill.strip() }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-success small">None! Great skills listing.</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Missing Keywords -->
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold text-white mb-2"><i class="fas fa-key me-1 text-primary"></i>Missing ATS Keywords:</h6>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% if analysis.missing_keywords %}
+                                                {% for word in analysis.missing_keywords.split(',') %}
+                                                    <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-20 px-2 py-1">{{ word.strip() }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-success small">None! Solid ATS optimization.</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Formatting & Grammar lists -->
+                                    <div class="row mb-3 g-2">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold text-white mb-1"><i class="fas fa-table-cells me-1 text-warning"></i>Layout & Format Alerts:</h6>
+                                            <ul class="ps-3 text-secondary mb-0">
+                                                {% set formats = analysis.formatting_issues | json_loads_safe %}
+                                                {% if formats %}
+                                                    {% for f in formats %}
+                                                        <li class="mb-1">{{ f }}</li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="text-success mb-0 list-unstyled"><i class="fas fa-check text-success me-1"></i> Clean layout configuration.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold text-white mb-1"><i class="fas fa-spell-check me-1 text-success"></i>Grammar Suggestions:</h6>
+                                            <ul class="ps-3 text-secondary mb-0">
+                                                {% set grammars = analysis.grammar_suggestions | json_loads_safe %}
+                                                {% if grammars %}
+                                                    {% for g in grammars %}
+                                                        <li class="mb-1">{{ g }}</li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="text-success mb-0 list-unstyled"><i class="fas fa-check text-success me-1"></i> No errors identified.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recommendations -->
+                                    <div class="p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+                                        <h6 class="fw-bold text-white mb-1"><i class="fas fa-lightbulb me-1 text-gradient-neon"></i>Improvement Plan:</h6>
+                                        <p class="mb-0 text-secondary leading-14">{{ analysis.recommendations }}</p>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center text-secondary py-5">
+                    <i class="fas fa-file-invoice display-4 mb-3 text-white-50"></i>
+                    <p class="mb-0">No past audits registered. Upload a resume on the left panel to begin!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Analyzing Screen -->
+<div id="analyzerOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background: rgba(8,11,17,0.9); z-index: 2000;">
+    <div class="spinner-border text-info mb-3" role="status" style="width: 3.5rem; height: 3.5rem; border-width: 0.35em;"></div>
+    <h4 class="fw-bold text-white text-gradient-neon">Analyzing Document Structure</h4>
+    <p class="text-secondary text-center max-width-400 mt-2 px-3">Parsing file buffers, evaluating sections layout, and computing matching scores with Llama 3...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Toggle loading
+function showAnalyzerScreen() {
+    document.getElementById('analyzerOverlay').classList.remove('d-none');
+}
+
+// Drag & Drop visual controllers
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('resumeFileInput');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const fileDetails = document.getElementById('fileDetails');
+const fileNameLabel = document.getElementById('fileNameLabel');
+const dragLabel = document.getElementById('dragLabel');
+const fileIcon = document.getElementById('fileIcon');
+
+if (dropZone && fileInput) {
+    // Dropzone drag-over highlighting
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--accent-blue)';
+            dropZone.style.background = 'rgba(99, 102, 241, 0.05)';
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'rgba(255,255,255,0.1)';
+            dropZone.style.background = 'rgba(255,255,255,0.01)';
+        }, false);
+    });
+
+    // Drop handler
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelection(files[0]);
+        }
+    });
+
+    // File change handler
+    fileInput.addEventListener('change', (e) => {
+        if (fileInput.files.length > 0) {
+            handleFileSelection(fileInput.files[0]);
+        }
+    });
+}
+
+function handleFileSelection(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'pdf' && ext !== 'docx') {
+        showToast('Unsupported document. Please select a PDF or DOCX file.', 'error');
+        clearFileSelection();
+        return;
+    }
+
+    fileNameLabel.textContent = file.name;
+    fileDetails.classList.remove('d-none');
+    analyzeBtn.classList.remove('disabled');
+    
+    // UI elements update
+    dragLabel.textContent = 'Document selected';
+    fileIcon.className = 'fas fa-check-circle display-4 text-success mb-3';
+    showToast('Document attached successfully.', 'success');
+}
+
+function clearFileSelection() {
+    fileInput.value = '';
+    fileDetails.classList.add('d-none');
+    analyzeBtn.classList.add('disabled');
+    
+    // Reset UI
+    dragLabel.textContent = 'Drag & drop files here';
+    fileIcon.className = 'fas fa-file-pdf display-4 text-gradient-neon mb-3';
+}
+</script>
+{% endblock %}
